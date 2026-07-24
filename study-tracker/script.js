@@ -341,7 +341,99 @@ async function loadDashboard() {
     let last7 = data.slice(-7);
     let avgScore = last7.reduce((a, b) => a + b.score, 0) / last7.length;
     document.getElementById("weeklyAvg").innerText = "Weekly Avg: " + avgScore.toFixed(1) + "%";
+
+    // Load Tasks
+    loadTasks();
 }
+
+// ==================== TASK MANAGER ====================
+let tasks = [];
+
+function loadTasks() {
+    const savedTasks = localStorage.getItem('studyTasks');
+    if (savedTasks) {
+        tasks = JSON.parse(savedTasks);
+    }
+    renderTasks();
+}
+
+function saveTasks() {
+    localStorage.setItem('studyTasks', JSON.stringify(tasks));
+}
+
+function renderTasks() {
+    const taskList = document.getElementById('taskList');
+    if (!taskList) return; // Only render if on dashboard
+
+    taskList.innerHTML = '';
+
+    tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+
+        const taskContent = document.createElement('div');
+        taskContent.className = 'task-content';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'task-checkbox';
+        checkbox.checked = task.completed;
+        checkbox.onchange = () => toggleTask(index);
+
+        const taskText = document.createElement('span');
+        taskText.className = 'task-text' + (task.completed ? ' completed' : '');
+        taskText.textContent = task.text; // Safe from XSS
+
+        taskContent.appendChild(checkbox);
+        taskContent.appendChild(taskText);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'delete-task-btn';
+        deleteBtn.textContent = '×';
+        deleteBtn.onclick = () => deleteTask(index);
+
+        li.appendChild(taskContent);
+        li.appendChild(deleteBtn);
+
+        taskList.appendChild(li);
+    });
+}
+
+function addTask() {
+    const input = document.getElementById('taskInput');
+    const text = input.value.trim();
+
+    if (text) {
+        tasks.push({ text: text, completed: false });
+        input.value = '';
+        saveTasks();
+        renderTasks();
+    }
+}
+
+function toggleTask(index) {
+    tasks[index].completed = !tasks[index].completed;
+    saveTasks();
+    renderTasks();
+}
+
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveTasks();
+    renderTasks();
+}
+
+// Allow pressing Enter to add task
+document.addEventListener('DOMContentLoaded', () => {
+    const taskInput = document.getElementById('taskInput');
+    if (taskInput) {
+        taskInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+    }
+});
 
 async function loadChart() {
     let user = await getCurrentUser();

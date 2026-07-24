@@ -30,6 +30,16 @@
     <!-- Chart -->
     <canvas id="myChart" style="max-height: 280px;"></canvas>
 
+    <!-- Task Manager / To-Do List -->
+    <div class="task-manager">
+        <h2>DAILY TASKS</h2>
+        <div class="task-input-container">
+            <input type="text" id="taskInput" placeholder="Add a topic or task...">
+            <button type="button" onclick="addTask()" class="add-task-btn">ADD</button>
+        </div>
+        <ul id="taskList"></ul>
+    </div>
+
     <div class="nav">
         <a href="entry.html">ADD DATA</a>
         <a href="chat.html">💬 AI CHAT</a>
